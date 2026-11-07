@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img,video{max-width:100%}[hidden]{display:none!important}</style>
+<title>오늘 점심 뭐먹지</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 한 줄로 내려 읽는 5개 영역. 첫 화면·이용 방법은 2단(모바일 1단), 큰 글자와 넓은 여백 */
+:root {
+  --bg: #F6F7F1;          /* 쌀밥빛 바탕, 초록 기운 */
+  --surface: #FFFFFF;
+  --ink: #18241C;         /* 본문 */
+  --muted: #4E5B52;       /* 보조 글 */
+  --line: #D6DCCF;
+  --accent: #1E5A3A;      /* 시금치 초록 */
+  --accent-ink: #FFFFFF;
+  --yolk: #F3C33B;        /* 달걀노른자 강조 */
+  --band: #E9EDE0;        /* 구분 띠 */
+  --ph: #EEF1E8;          /* 자리 표시 칸 */
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --step: clamp(4.5rem, 9vw, 8rem);  /* 영역 위아래 여백 */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121A15; --surface: #1A241E; --ink: #EEF2EA; --muted: #B3BEB5; --line: #2F3B33;
+    --accent: #7FCB9C; --accent-ink: #0E1A13; --yolk: #F3C33B; --band: #18221B; --ph: #1F2A23;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121A15; --surface: #1A241E; --ink: #EEF2EA; --muted: #B3BEB5; --line: #2F3B33;
+  --accent: #7FCB9C; --accent-ink: #0E1A13; --yolk: #F3C33B; --band: #18221B; --ph: #1F2A23;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 1.25rem; line-height: 1.75;
+  word-break: keep-all; overflow-wrap: anywhere;
+}
+.wrap {
+  max-width: 72rem; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 640px) { .wrap { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
+
+h1, h2 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.5rem, 6.2vw, 4.5rem); line-height: 1.2; }
+h2 { font-size: clamp(2rem, 4.6vw, 3.25rem); line-height: 1.25; }
+h3 { font-size: 1.5rem; line-height: 1.4; margin: 0; font-weight: 700; }
+p { margin: 0; }
+.lead { font-size: clamp(1.3rem, 2.2vw, 1.5rem); color: var(--muted); max-width: 34em; }
+.eyebrow { font-size: 1.05rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+section { padding-block: var(--step); }
+
+/* 머리 */
+.top { padding-block: 1.5rem; }
+.brand { font-family: var(--font-display); font-size: 1.6rem; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: .6rem; }
+.brand .dot { width: .9rem; height: .9rem; border-radius: 50%; background: var(--yolk); box-shadow: 0 0 0 .3rem color-mix(in srgb, var(--yolk) 30%, transparent); }
+
+/* 대표 버튼 */
+.cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: .75rem;
+  min-height: 4.25rem; padding: 0 2.25rem; border-radius: 999px;
+  background: var(--accent); color: var(--accent-ink);
+  font: 700 1.4rem/1 var(--font-body); text-decoration: none; border: 0; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 .5rem 1.5rem -0.5rem color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.cta:hover { transform: translateY(-2px); }
+.cta:focus-visible { outline: 4px solid var(--yolk); outline-offset: 4px; }
+.cta svg { width: 1.4rem; height: 1.4rem; }
+.cta-note { margin-top: 1rem; font-size: 1.05rem; color: var(--muted); min-height: 1.6em; }
+
+/* 자리 표시 칸 (대표 이미지·소개 영상) */
+.placeholder {
+  width: 100%; max-width: 100%; border: 3px dashed var(--line); border-radius: 1.5rem;
+  background: var(--ph); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: .75rem; padding: 2rem 1.5rem; color: var(--muted);
+}
+.placeholder .tag { font-weight: 700; color: var(--ink); font-size: 1.3rem; }
+.placeholder .desc { font-size: 1.05rem; max-width: 22em; }
+.placeholder .icon { width: 4rem; height: 4rem; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--line); color: var(--accent); }
+.placeholder .icon svg { width: 1.8rem; height: 1.8rem; }
+.ph-image { aspect-ratio: 4 / 5; }
+/* 소개 영상: 원본 1280×720(16:9) 비율 그대로, 잘림 없이 */
+.video-frame { margin: 0; width: 100%; max-width: 100%; min-width: 0; aspect-ratio: 16 / 9; border-radius: 1.5rem; overflow: hidden; background: #000; border: 2px solid var(--line); }
+.video-frame video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
+
+/* 영역 1 첫 화면 */
+.hero { padding-top: clamp(2rem, 5vw, 4rem); }
+.hero-grid { display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); align-items: center; }
+.hero-text { display: flex; flex-direction: column; gap: 1.75rem; min-width: 0; }
+.hero h1 .hl { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--yolk) 70%, transparent) 62%); padding: 0 .1em; }
+/* 대표 이미지: 원본 비율(1649×2048) 그대로, 자르지 않고 축소만 */
+.hero-image { margin: 0; width: 100%; max-width: 30rem; justify-self: center; min-width: 0; }
+.hero-image img { display: block; width: 100%; height: auto; aspect-ratio: 1649 / 2048; border-radius: 1.5rem; border: 2px solid var(--line); box-shadow: 0 1.5rem 3rem -1.5rem color-mix(in srgb, var(--ink) 35%, transparent); }
+@media (min-width: 900px) { .hero-grid { grid-template-columns: 1.15fr .85fr; } .hero-image { justify-self: end; } }
+
+/* 영역 2 문제 공감 */
+.problem { background: var(--band); }
+.problem-grid { display: grid; gap: 3rem; }
+.problem-head { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.pains { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.pains li { background: var(--surface); border-radius: 1.25rem; padding: 1.5rem 1.75rem; font-size: 1.35rem; font-weight: 500; display: flex; gap: 1rem; align-items: flex-start; }
+.pains li .mark { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; background: var(--ph); color: var(--accent); font-weight: 700; margin-top: .15rem; }
+.pains li.result { background: var(--accent); color: var(--accent-ink); }
+.pains li.result .mark { background: var(--yolk); color: #18241C; }
+@media (min-width: 900px) { .problem-grid { grid-template-columns: .9fr 1.1fr; align-items: start; } }
+
+/* 영역 3 서비스 소개와 핵심 기능 */
+.intro-head { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 3.5rem; }
+.features { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; }
+.feature { background: var(--surface); border: 2px solid var(--line); border-radius: 1.5rem; padding: 2.25rem 2rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.feature .order { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+.feature p { color: var(--muted); }
+.feature .sample { margin-top: auto; padding-top: 1rem; border-top: 2px dashed var(--line); font-size: 1.05rem; color: var(--ink); display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip { display: inline-block; padding: .2rem .8rem; border-radius: 999px; background: var(--ph); font-variant-numeric: tabular-nums; }
+@media (min-width: 900px) { .features { grid-template-columns: repeat(3, 1fr); } }
+
+/* 영역 4 이용 방법 */
+.how { background: var(--band); }
+.how-grid { display: grid; gap: 3rem; align-items: center; }
+.how-text { display: flex; flex-direction: column; gap: 2.25rem; min-width: 0; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.5rem; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 3.25rem 1fr; gap: 1.25rem; align-items: start; font-size: 1.35rem; font-weight: 500; }
+.steps li::before { counter-increment: s; content: counter(s); width: 3.25rem; height: 3.25rem; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font: 400 1.5rem/1 var(--font-display); }
+.steps li span { padding-top: .35rem; min-width: 0; }
+.steps em { font-style: normal; background: var(--surface); border: 2px solid var(--line); border-radius: .6rem; padding: 0 .45rem; white-space: nowrap; }
+@media (min-width: 900px) { .how-grid { grid-template-columns: 1fr 1fr; } }
+
+/* 영역 5 마무리 */
+.closing { text-align: center; }
+.closing-box { display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+.closing .bowl { width: 4.5rem; height: 4.5rem; }
+
+footer { border-top: 2px solid var(--line); padding-block: 2.5rem; color: var(--muted); font-size: 1.05rem; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="오늘 점심 뭐먹지 처음으로"><span class="dot" aria-hidden="true"></span>오늘 점심 뭐먹지</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- 영역 1. 첫 화면 -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <h1 id="hero-title">점심 메뉴,<br><span class="hl">모두의 조건</span>으로<br>한 번에 정하세요</h1>
+        <p class="lead">동료들 대신 메뉴를 정할 때, 모두의 예산·시간·취향을 한 번에 입력하면 메뉴 3개를 예상 가격과 추천 이유와 함께 알려드립니다.</p>
+        <div>
+          <a class="cta js-start" id="cta-hero" href="#">메뉴 추천 시작하기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <p class="cta-note" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <figure class="hero-image">
+        <img src="media/hero.jpg" width="1200" height="1490" alt="비 오는 점심시간, 우산을 쓴 직장인이 분식집 앞에서 휴대전화로 김밥·떡볶이·돈가스 세 가지 메뉴를 살펴보는 모습">
+      </figure>
+    </div>
+  </section>
+
+  <!-- 영역 2. 문제 공감 -->
+  <section class="problem" aria-labelledby="problem-title">
+    <div class="wrap problem-grid">
+      <div class="problem-head">
+        <p class="eyebrow">이런 적 있으시죠</p>
+        <h2 id="problem-title">동료들 점심 메뉴, 정하는 데 오래 걸리지 않나요?</h2>
+        <p class="lead">여러 동료의 예산과 취향을 모아 대신 메뉴를 정해야 합니다.</p>
+      </div>
+      <ul class="pains">
+        <li><span class="mark" aria-hidden="true">₩</span><span>사람마다 예산이 다릅니다.</span></li>
+        <li><span class="mark" aria-hidden="true">✕</span><span>사람마다 좋아하는 음식과 못 먹는 음식이 다릅니다.</span></li>
+        <li class="result"><span class="mark" aria-hidden="true">!</span><span>그래서 하나로 정하는 데 시간이 걸립니다.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 영역 3. 서비스 소개와 핵심 기능 -->
+  <section class="intro" aria-labelledby="intro-title">
+    <div class="wrap">
+      <div class="intro-head">
+        <p class="eyebrow">서비스 소개</p>
+        <h2 id="intro-title">조건만 넣으면, AI가 메뉴를 비교해 드립니다</h2>
+      </div>
+      <ol class="features">
+        <li class="feature">
+          <span class="order">입력</span>
+          <h3>조건 입력</h3>
+          <p>모두의 예산·시간·음식 종류·제외 음식을 한 번에 입력합니다.</p>
+          <div class="sample" aria-label="입력 항목"><span class="chip">예산</span><span class="chip">시간</span><span class="chip">음식 종류</span><span class="chip">제외 음식</span></div>
+        </li>
+        <li class="feature">
+          <span class="order">결과</span>
+          <h3>메뉴 3개 추천</h3>
+          <p>AI가 조건에 맞는 일반 메뉴를 비교해 메뉴 3개, 예상 가격 범위, 추천 이유를 알려드립니다.</p>
+          <div class="sample" aria-label="받는 결과"><span class="chip">메뉴 3개</span><span class="chip">예상 가격 범위</span><span class="chip">추천 이유</span></div>
+        </li>
+        <li class="feature">
+          <span class="order">다시</span>
+          <h3>다시 추천</h3>
+          <p>결과가 마음에 들지 않으면 조건을 바꾸거나 다시 추천받을 수 있습니다.</p>
+          <div class="sample" aria-label="다시 추천 방법"><span class="chip">조건 바꾸기</span><span class="chip">다시 추천</span></div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 영역 4. 이용 방법 -->
+  <section class="how" aria-labelledby="how-title">
+    <div class="wrap how-grid">
+      <div class="how-text">
+        <div>
+          <p class="eyebrow">이용 방법</p>
+          <h2 id="how-title">4단계면 끝나요</h2>
+        </div>
+        <ol class="steps">
+          <li><span>모두의 예산·시간·취향을 묶어서 선택합니다.</span></li>
+          <li><span>앱 안의 <em>메뉴 추천받기</em> 버튼을 누릅니다.</span></li>
+          <li><span>메뉴 3개와 예상 가격(2천 원 폭), 추천 이유를 확인합니다.</span></li>
+          <li><span>조건을 바꾸거나 다시 추천받습니다.</span></li>
+        </ol>
+      </div>
+      <figure class="video-frame">
+        <video id="intro-video" controls playsinline preload="metadata" poster="media/intro-poster.jpg" aria-label="오늘 점심 뭐먹지 소개 영상">
+          <source src="media/intro.mp4" type="video/mp4">
+          이 브라우저에서는 영상을 재생할 수 없습니다.
+        </video>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 영역 5. 마무리 행동 유도 -->
+  <section class="closing" aria-labelledby="closing-title">
+    <div class="wrap closing-box">
+      <svg class="bowl" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M8 30h48a24 24 0 0 1-48 0z" fill="var(--accent)"/>
+        <path d="M14 30c2-8 10-12 18-12s16 4 18 12z" fill="var(--yolk)"/>
+        <path d="M24 12c0-3 3-3 3-6M34 12c0-3 3-3 3-6" stroke="var(--muted)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <h2 id="closing-title">오늘 점심, 지금 바로 정해 보세요</h2>
+      <div>
+        <a class="cta js-start" id="cta-closing" href="#">메뉴 추천 시작하기
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <p class="cta-note" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">오늘 점심 뭐먹지</div>
+</footer>
+
+<script>
+  // 웹앱의 조건 입력 화면 주소. 웹앱이 완성되면 여기에 주소를 넣으면 두 버튼이 모두 그곳으로 이동합니다.
+  const APP_URL = "";
+
+  document.querySelectorAll(".js-start").forEach(function (btn) {
+    if (APP_URL) {
+      btn.href = APP_URL;
+      return;
+    }
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      const note = btn.parentElement.querySelector(".cta-note");
+      if (note) note.textContent = "조건 입력 화면은 웹앱이 완성되면 이 버튼에 연결됩니다.";
+    });
+  });
+</script>
+</body>
+</html>
